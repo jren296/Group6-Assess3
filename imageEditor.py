@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import *
 from tkinter import filedialog, messagebox
 import cv2
 from PIL import Image, ImageTk
@@ -58,7 +59,7 @@ class ImageEditor:
         self.thumbnail = cv2.resize(image, (800, 600), interpolation=cv2.INTER_AREA)
         thumbnail_pil = Image.fromarray(cv2.cvtColor(self.thumbnail, cv2.COLOR_BGR2RGB))
         thumbnail_tk = ImageTk.PhotoImage(thumbnail_pil)
-        self.canvas.create_image(500, 400, image=thumbnail_tk, anchor="center")
+        self.canvas.create_image(0, 0, anchor=NW, image=thumbnail_tk)
         self.canvas.image = thumbnail_tk # Keeps a reference image
 
     def start_crop(self, event):
@@ -100,7 +101,9 @@ class ImageEditor:
     def display_cropped(self):
         cropped_pil = Image.fromarray(cv2.cvtColor(self.displayed_cropped, cv2.COLOR_BGR2RGB))
         cropped_tk = ImageTk.PhotoImage(cropped_pil) 
-        self.canvas.create_image(600, 300, image=cropped_tk, anchor='center')  
+        self.canvas.create_image(600, 300, image=cropped_tk, anchor='center')
+        # self.canvas.create_rectangle(self.rect_start[0], self.rect_start[1], self.rect_end[0], self.rect_end[1],
+        #                                 outline='blue', tag='crop_rect')
         self.canvas.cropped_image = cropped_tk # Keep the reference
 
     def resize_preview(self, event):
