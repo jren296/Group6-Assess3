@@ -111,7 +111,7 @@ class ImageEditor:
             scale = self.slider.get() / 100
             resized = cv2.resize(self.cropped_image, None, fx=scale, fy=scale, interpolation=cv2.INTER_LINEAR)
             self.displayed_cropped = resized
-            self.display_cropped
+            self.display_cropped()
 
     def undo(self):
         if self.undo_stack:
