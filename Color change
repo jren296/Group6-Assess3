@@ -47,6 +47,8 @@ class ImageEditor:
         self.root.bind('<Control-z>', lambda event: self.undo())
         self.root.bind('<Control-y>', lambda event: self.redo())
         self.root.bind('<Control-s>', lambda event: self.save_image())
+        self.root.bind('<Control-c>', lambda event: self.change_color())  # Shortcut for color change
+        self.root.bind('<Control-i>', lambda event: self.invert_color())  # Shortcut for color inversion
 
     def load_image(self):
         file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.jpeg *.jpg *.png *.bmp")])
