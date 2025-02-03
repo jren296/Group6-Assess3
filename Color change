@@ -18,7 +18,7 @@ class ImageEditor:
         self.redo_stack = []
 
         # Create GUI elements
-        self.canvas = tk.Canvas(root, width=800, height=600, bg='gray')
+        self.canvas = tk.Canvas(root, width=1600, height=600, bg='gray')  # Increased width to fit both images
         self.canvas.pack()
         buttonFrame = tk.Frame(root)
         buttonFrame.pack(side='top', pady=5)
@@ -134,7 +134,7 @@ class ImageEditor:
     def display_cropped(self):
         cropped_pil = Image.fromarray(cv2.cvtColor(self.displayed_cropped, cv2.COLOR_BGR2RGB))
         cropped_tk = ImageTk.PhotoImage(cropped_pil) 
-        self.canvas.create_image(600, 300, image=cropped_tk, anchor='center')
+        self.canvas.create_image(800, 0, image=cropped_tk, anchor='nw') # Placing cropped image to the right
         # self.canvas.create_rectangle(self.rect_start[0], self.rect_start[1], self.rect_end[0], self.rect_end[1],
         #                                 outline='blue', tag='crop_rect')
         self.canvas.cropped_image = cropped_tk # Keep the reference
