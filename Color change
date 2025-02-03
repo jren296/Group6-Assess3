@@ -31,12 +31,13 @@ class ImageEditor:
         self.undoButton.grid(row=0, column=2, padx=5)
         self.redoButton = tk.Button(buttonFrame, text='Redo', command=self.redo, state=tk.DISABLED)
         self.redoButton.grid(row=0, column=3, padx=5)
-        self.color_button = Button(self.root, text="Change Color", command=self.change_color)
-        self.color_button.pack()
-
+        self.color_button = Button(buttonFrame, text="Change Color", command=self.change_color)
+        self.color_button.grid(row=0, column=4, padx=5)
+        self.invertButton = Button(buttonFrame, text = "Invert Color", command=self.invert_color)
+        self.invertButton.grid(row=0, column=5, padx=5)
         # Set up slider
-        self.slider = tk.Scale(buttonFrame, from_=10, to=200, orient='horizontal', label='Resize Cropped Image')
-        self.slider.grid(row=0, column=4, padx=5)
+        self.slider = tk.Scale(buttonFrame, from_=10, to=200, orient='horizontal', label='Resize Cropped Pic')
+        self.slider.grid(row=0, column=6, padx=5)
         self.slider.bind('<Motion>', self.resize_preview)
         # Bind mouse buttons for cropping
         self.canvas.bind('<Button-1>', self.start_crop)
@@ -69,19 +70,30 @@ class ImageEditor:
             messagebox.showwarning("Warning", "No image loaded!")
             return
 
-        # Example: Convert to Grayscale
-        grayscale_image = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+        # Convert to Grayscale
+        grayscale_image = cv2.cvtColor(self.displayed_cropped, cv2.COLOR_BGR2GRAY)
 
         # Convert Grayscale to BGR to maintain consistency with the original format
         grayscale_bgr = cv2.cvtColor(grayscale_image, cv2.COLOR_GRAY2BGR)
 
-        # OR, apply color inversion (negative effect)
-        # inverted_image = cv2.bitwise_not(self.image)
+        self.displayed_cropped = grayscale_bgr
 
-        # Display the changed color image (grayscale in this case)
-        self.image_rgb = cv2.cvtColor(grayscale_bgr, cv2.COLOR_BGR2RGB)
-        self.display_image(self.image_rgb)    
+        self.display_cropped()     
+
+    def invert_color(self):
         
+        if self.image is None:
+            messagebox.showwarning("Warning", "No image loaded!")
+            return
+
+        inverted_image = cv2.cvtColor(self.displayed_cropped, cv2.COLOR_BGR2RGB)
+
+        # Apply color inversion (negative effect)
+        inverted_image = cv2.bitwise_not(self.displayed_cropped)
+
+        self.displayed_cropped = inverted_image
+
+        self.display_cropped()         
 
     def start_crop(self, event):
         if self.image is not None:
@@ -156,7 +168,7 @@ class ImageEditor:
         if self.cropped_image is not None:
             file_path = filedialog.asksaveasfilename(defaultextension=".jpg", filetypes=[("JPEG", "*.jpg"), ("PNG", "*.png")])
             if file_path:
-                cv2.imwrite(file_path, cv2.cvtColor(self.displayed_cropped, cv2.COLOR_BGR2RGB))
+                cv2.imwrite(file_path, self.displayed_cropped)
                 messagebox.showinfo("Save Image", "Save successful")
 
 if __name__ == "__main__":

@@ -32,7 +32,7 @@ class ImageEditor:
         self.redoButton = tk.Button(buttonFrame, text='Redo', command=self.redo, state=tk.DISABLED)
         self.redoButton.grid(row=0, column=3, padx=5)
         # Set up slider
-        self.slider = tk.Scale(buttonFrame, from_=10, to=200, orient='horizontal', label='Resize Cropped Image')
+        self.slider = tk.Scale(buttonFrame, from_=10, to=200, orient='horizontal', label='Resize Cropped')
         self.slider.grid(row=0, column=4, padx=5)
         self.slider.bind('<Motion>', self.resize_preview)
         # Bind mouse buttons for cropping
