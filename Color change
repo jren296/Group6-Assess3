@@ -31,12 +31,12 @@ class ImageEditor:
         self.undoButton.grid(row=0, column=2, padx=5)
         self.redoButton = tk.Button(buttonFrame, text='Redo', command=self.redo, state=tk.DISABLED)
         self.redoButton.grid(row=0, column=3, padx=5)
-        self.color_button = Button(buttonFrame, text="Change Color", command=self.change_color)
+        self.color_button = Button(buttonFrame, text="Gray Scale", command=self.change_color)
         self.color_button.grid(row=0, column=4, padx=5)
         self.invertButton = Button(buttonFrame, text = "Invert Color", command=self.invert_color)
         self.invertButton.grid(row=0, column=5, padx=5)
         # Set up slider
-        self.slider = tk.Scale(buttonFrame, from_=10, to=200, orient='horizontal', label='Resize Cropped Pic')
+        self.slider = tk.Scale(buttonFrame, from_=30, to=300, orient='horizontal', label='Resize Crop')
         self.slider.grid(row=0, column=6, padx=5)
         self.slider.bind('<Motion>', self.resize_preview)
         # Bind mouse buttons for cropping
@@ -68,10 +68,12 @@ class ImageEditor:
         self.canvas.create_image(0, 0, anchor=NW, image=thumbnail_tk)
         self.canvas.image = thumbnail_tk # Keeps a reference image
     def change_color(self):
-        if self.image is None:
+        if self.image is None or self.displayed_cropped is None:
             messagebox.showwarning("Warning", "No image loaded!")
             return
-
+        self.undo_stack.append((self.image.copy(), self.displayed_cropped.copy()))
+        self.redo_stack.clear()
+        self.undoButton.config(state=tk.NORMAL)
         # Convert to Grayscale
         grayscale_image = cv2.cvtColor(self.displayed_cropped, cv2.COLOR_BGR2GRAY)
 
@@ -84,9 +86,12 @@ class ImageEditor:
 
     def invert_color(self):
         
-        if self.image is None:
+        if self.image is None or self.displayed_cropped is None:
             messagebox.showwarning("Warning", "No image loaded!")
             return
+        self.undo_stack.append((self.image.copy(), self.displayed_cropped.copy()))
+        self.redo_stack.clear()
+        self.undoButton.config(state=NORMAL)
 
         inverted_image = cv2.cvtColor(self.displayed_cropped, cv2.COLOR_BGR2RGB)
 
@@ -127,7 +132,7 @@ class ImageEditor:
             self.displayed_cropped = self.cropped_image.copy()
             self.display_cropped()
             # Set up undo and save
-            self.undo_stack.append(self.image.copy())
+            self.undo_stack.append((self.image.copy(), self.displayed_cropped.copy() if self.displayed_cropped is not None else None))
             self.redo_stack.clear()
             self.undoButton.config(state=tk.NORMAL)
             self.redoButton.config(state=tk.DISABLED)
@@ -143,6 +148,10 @@ class ImageEditor:
 
     def resize_preview(self, event):
         if self.cropped_image is not None:
+            self.undo_stack.append((self.image.copy(), self.displayed_cropped.copy()))
+            self.redo_stack.clear()
+            self.undoButton.config(state=NORMAL)
+
             scale = self.slider.get() / 100
             resized = cv2.resize(self.cropped_image, None, fx=scale, fy=scale, interpolation=cv2.INTER_LINEAR)
             self.displayed_cropped = resized
@@ -150,18 +159,22 @@ class ImageEditor:
 
     def undo(self):
         if self.undo_stack:
-            self.redo_stack.append(self.image.copy())
-            self.image = self.undo_stack.pop()
+            self.redo_stack.append((self.image.copy(), self.displayed_cropped.copy()))
+            self.image, self.displayed_cropped = self.undo_stack.pop()
             self.display_image(self.image)
+            if self.displayed_cropped is not None:
+                self.display_cropped()
             self.redoButton.config(state=tk.NORMAL)
         if not self.undo_stack:
             self.undoButton.config(state=tk.DISABLED)
 
     def redo(self):
         if self.redo_stack:
-            self.undo_stack.append(self.image.copy())
-            self.image = self.undo_stack.pop()
+            self.undo_stack.append((self.image.copy(), self.displayed_cropped.copy()))
+            self.image, self.displayed_cropped = self.redo_stack.pop()
             self.display_image(self.image)
+            if self.displayed_cropped is not None:
+                self.display_cropped()
             self.undoButton.config(state=tk.NORMAL)
         if not self.redo_stack:
             self.redoButton.config(state=tk.DISABLED)
